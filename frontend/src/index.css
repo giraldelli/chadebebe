@@ -1,0 +1,138 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --fundo-pagina: #f8fafc;
+    --texto-principal: #0f172a;
+  }
+
+  body {
+    background-color: #f8fafc;
+    color: #0f172a;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Textura suave de papel de linho para sensação tátil e artesanal */
+.textura-papel {
+  background-image: radial-gradient(rgba(14, 116, 144, 0.04) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Moldura de convite fino */
+.moldura-convite {
+  box-shadow: 
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 8px 24px rgba(15, 23, 42, 0.06),
+    0 24px 48px rgba(14, 116, 144, 0.05);
+}
+
+/* Animações de Flutuação (Float) para Nuvens e Balões */
+@keyframes flutuarNuvem1 {
+  0%, 100% {
+    transform: translateY(0px) translateX(0px);
+  }
+  50% {
+    transform: translateY(-16px) translateX(12px);
+  }
+}
+
+@keyframes flutuarNuvem2 {
+  0%, 100% {
+    transform: translateY(0px) translateX(0px);
+  }
+  50% {
+    transform: translateY(14px) translateX(-10px);
+  }
+}
+
+@keyframes flutuarNuvem3 {
+  0%, 100% {
+    transform: translateY(0px) translateX(0px);
+  }
+  50% {
+    transform: translateY(-12px) translateX(-14px);
+  }
+}
+
+@keyframes balancoPipa {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-10px) rotate(4deg);
+  }
+  66% {
+    transform: translateY(-5px) rotate(-4deg);
+  }
+}
+
+.animacao-nuvem-1 {
+  animation: flutuarNuvem1 7s ease-in-out infinite;
+}
+
+.animacao-nuvem-2 {
+  animation: flutuarNuvem2 9s ease-in-out infinite;
+}
+
+.animacao-nuvem-3 {
+  animation: flutuarNuvem3 11s ease-in-out infinite;
+}
+
+.animacao-pipa {
+  animation: balancoPipa 5s ease-in-out infinite;
+}
+
+/* Animações dos Automóveis correndo na horizontal até sair da tela */
+@keyframes correrHorizontalDireita {
+  0% {
+    transform: translateX(-160px);
+    opacity: 0;
+  }
+  2% {
+    opacity: 0.75;
+  }
+  96% {
+    opacity: 0.75;
+  }
+  100% {
+    transform: translateX(105vw);
+    opacity: 0;
+  }
+}
+
+@keyframes correrHorizontalEsquerda {
+  0% {
+    transform: translateX(105vw);
+    opacity: 0;
+  }
+  2% {
+    opacity: 0.75;
+  }
+  96% {
+    opacity: 0.75;
+  }
+  100% {
+    transform: translateX(-160px);
+    opacity: 0;
+  }
+}
+
+.animacao-carro-horizontal-direita-1 {
+  animation: correrHorizontalDireita 14s linear infinite;
+}
+
+.animacao-carro-horizontal-direita-2 {
+  animation: correrHorizontalDireita 18s linear 7s infinite;
+}
+
+.animacao-carro-horizontal-esquerda {
+  animation: correrHorizontalEsquerda 16s linear 3s infinite;
+}
