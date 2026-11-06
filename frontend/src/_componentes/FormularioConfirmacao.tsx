@@ -5,6 +5,7 @@ import { esquemaConfirmacaoPresenca, type TipoConfirmacaoPresenca } from '../_sc
 import { Botao } from '../components/ui/button';
 import { Cartao, CartaoConteudo, CartaoDescricao, CartaoCabecalho, CartaoTitulo } from '../components/ui/card';
 import { EntradaTexto } from '../components/ui/input';
+import { clienteSupabase } from '../lib/clienteSupabase';
 
 interface PropriedadesFormulario {
   urlApiBase: string;
@@ -50,23 +51,52 @@ export function FormularioConfirmacao({ urlApiBase }: PropriedadesFormulario) {
     setCarregando(true);
 
     try {
-      const resposta = await fetch(`${urlApiBase}/api/convidados/confirmar`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(resultadoValidacao.data),
-      });
+      // 1. Se o Supabase estiver configurado, salva diretamente na nuvem
+      if (clienteSupabase) {
+        const { data: existente } = await clienteSupabase
+          .from('convidados')
+          .select('id')
+          .ilike('nome_completo', resultadoValidacao.data.nomeCompleto)
+          .maybeSingle();
 
-      const corpoResposta = await resposta.json();
+        if (existente) {
+          throw new Error(`Olá! O convidado '${resultadoValidacao.data.nomeCompleto}' já confirmou presença anteriormente.`);
+        }
 
-      if (!resposta.ok) {
-        throw new Error(corpoResposta.mensagem || 'Não foi possível confirmar a sua presença.');
+        const { error: erroInsercao } = await clienteSupabase
+          .from('convidados')
+          .insert({
+            nome_completo: resultadoValidacao.data.nomeCompleto,
+            nome_acompanhante: resultadoValidacao.data.nomeAcompanhante || null,
+            email: resultadoValidacao.data.email || null,
+            confirmado: true,
+          });
+
+        if (erroInsercao) {
+          throw new Error('Não foi possível salvar sua confirmação. Tente novamente.');
+        }
+
+        setMensagemSucesso('Presença confirmada com sucesso! Mal podemos esperar para celebrar com você!');
+      } else {
+        // 2. Fallback para a API local em .NET
+        const resposta = await fetch(`${urlApiBase}/api/convidados/confirmar`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(resultadoValidacao.data),
+        });
+
+        const corpoResposta = await resposta.json();
+
+        if (!resposta.ok) {
+          throw new Error(corpoResposta.mensagem || 'Não foi possível confirmar a sua presença.');
+        }
+
+        setMensagemSucesso(corpoResposta.mensagem || 'Sua presença foi confirmada com sucesso!');
       }
 
-      setMensagemSucesso(corpoResposta.mensagem || 'Sua presença foi confirmada com sucesso!');
-
-      // Chuva de confetes com paleta refinada (ouro e marinho)
+      // Efeito festivo de confetes
       confetti({
         particleCount: 70,
         spread: 60,
@@ -80,7 +110,7 @@ export function FormularioConfirmacao({ urlApiBase }: PropriedadesFormulario) {
     } catch (excecao) {
       let mensagem = 'Erro ao conectar ao servidor.';
       if (excecao instanceof TypeError && excecao.message.toLowerCase().includes('fetch')) {
-        mensagem = 'Não foi possível conectar ao servidor. Verifique se o backend está rodando no terminal (dotnet run).';
+        mensagem = 'Não foi possível conectar ao servidor. Verifique sua conexão com a internet.';
       } else if (excecao instanceof Error) {
         mensagem = excecao.message;
       }

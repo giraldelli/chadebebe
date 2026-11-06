@@ -14,6 +14,7 @@ import {
 import { Botao } from '../components/ui/button';
 import { Cartao, CartaoConteudo, CartaoCabecalho, CartaoTitulo, CartaoDescricao } from '../components/ui/card';
 import { EntradaTexto } from '../components/ui/input';
+import { clienteSupabase } from '../lib/clienteSupabase';
 
 interface ConvidadoItem {
   id: string;
@@ -53,6 +54,50 @@ export function PainelAdministrador({ urlApiBase, aoFechar }: PropriedadesPainel
     listaConvidados: [],
   });
 
+  const chaveAdminEsperada = import.meta.env.VITE_CHAVE_ADMIN || 'chadebebe2026';
+
+  const buscarDadosSupabase = async (): Promise<ResumoConvidados> => {
+    if (!clienteSupabase) {
+      throw new Error('Cliente Supabase não configurado.');
+    }
+
+    const { data, error } = await clienteSupabase
+      .from('convidados')
+      .select('*')
+      .order('data_confirmacao', { ascending: false });
+
+    if (error) {
+      throw new Error('Não foi possível carregar os convidados do Supabase.');
+    }
+
+    const listaConvidados: ConvidadoItem[] = (data || []).map((item: {
+      id: string;
+      nome_completo: string;
+      nome_acompanhante: string | null;
+      email: string | null;
+      data_confirmacao: string;
+      data_criacao: string;
+    }) => ({
+      id: item.id,
+      nomeCompleto: item.nome_completo,
+      nomeAcompanhante: item.nome_acompanhante,
+      email: item.email,
+      dataConfirmacao: item.data_confirmacao,
+      dataCriacao: item.data_criacao,
+    }));
+
+    const totalConvidados = listaConvidados.length;
+    const totalAcompanhantes = listaConvidados.filter(c => Boolean(c.nomeAcompanhante)).length;
+    const totalPessoasConfirmadas = totalConvidados + totalAcompanhantes;
+
+    return {
+      totalConvidados,
+      totalAcompanhantes,
+      totalPessoasConfirmadas,
+      listaConvidados,
+    };
+  };
+
   const executarAutenticar = async (evento: React.SyntheticEvent) => {
     evento.preventDefault();
     setMensagemErro(null);
@@ -65,24 +110,34 @@ export function PainelAdministrador({ urlApiBase, aoFechar }: PropriedadesPainel
     setCarregando(true);
 
     try {
-      const resposta = await fetch(`${urlApiBase}/api/convidados`, {
-        method: 'GET',
-        headers: {
-          'X-Chave-Admin': chaveAcesso.trim(),
-        },
-      });
-
-      if (!resposta.ok) {
-        if (resposta.status === 401) {
+      if (clienteSupabase) {
+        if (chaveAcesso.trim() !== chaveAdminEsperada) {
           throw new Error('Chave de acesso incorreta.');
         }
-        throw new Error('Falha ao autenticar.');
-      }
+        const dados = await buscarDadosSupabase();
+        setResumo(dados);
+        setEstaAutenticado(true);
+        setChaveSalva(chaveAcesso.trim());
+      } else {
+        const resposta = await fetch(`${urlApiBase}/api/convidados`, {
+          method: 'GET',
+          headers: {
+            'X-Chave-Admin': chaveAcesso.trim(),
+          },
+        });
 
-      const dados: ResumoConvidados = await resposta.json();
-      setResumo(dados);
-      setEstaAutenticado(true);
-      setChaveSalva(chaveAcesso.trim());
+        if (!resposta.ok) {
+          if (resposta.status === 401) {
+            throw new Error('Chave de acesso incorreta.');
+          }
+          throw new Error('Falha ao autenticar.');
+        }
+
+        const dados: ResumoConvidados = await resposta.json();
+        setResumo(dados);
+        setEstaAutenticado(true);
+        setChaveSalva(chaveAcesso.trim());
+      }
     } catch (excecao) {
       let mensagem = 'Erro na autenticação.';
       if (excecao instanceof TypeError && excecao.message.toLowerCase().includes('fetch')) {
@@ -102,19 +157,24 @@ export function PainelAdministrador({ urlApiBase, aoFechar }: PropriedadesPainel
     setMensagemErro(null);
 
     try {
-      const resposta = await fetch(`${urlApiBase}/api/convidados`, {
-        method: 'GET',
-        headers: {
-          'X-Chave-Admin': chaveSalva,
-        },
-      });
+      if (clienteSupabase) {
+        const dados = await buscarDadosSupabase();
+        setResumo(dados);
+      } else {
+        const resposta = await fetch(`${urlApiBase}/api/convidados`, {
+          method: 'GET',
+          headers: {
+            'X-Chave-Admin': chaveSalva,
+          },
+        });
 
-      if (!resposta.ok) {
-        throw new Error('Não foi possível atualizar a lista de convidados.');
+        if (!resposta.ok) {
+          throw new Error('Não foi possível atualizar a lista de convidados.');
+        }
+
+        const dados: ResumoConvidados = await resposta.json();
+        setResumo(dados);
       }
-
-      const dados: ResumoConvidados = await resposta.json();
-      setResumo(dados);
     } catch (excecao) {
       const mensagem = excecao instanceof Error ? excecao.message : 'Erro ao atualizar dados.';
       setMensagemErro(mensagem);
@@ -128,23 +188,50 @@ export function PainelAdministrador({ urlApiBase, aoFechar }: PropriedadesPainel
     setBaixandoPlanilha(true);
 
     try {
-      const resposta = await fetch(`${urlApiBase}/api/convidados/exportar-planilha?chave=${encodeURIComponent(chaveSalva)}`, {
-        method: 'GET',
-      });
+      if (clienteSupabase) {
+        // Gera CSV direto no cliente com BOM UTF-8 para abrir no Excel em português
+        let conteudoCsv = '\uFEFF';
+        conteudoCsv += 'ID;Nome Completo;Acompanhante;Possui Acompanhante;E-mail;Data de Confirmação\n';
 
-      if (!resposta.ok) {
-        throw new Error('Não foi possível exportar a planilha.');
+        for (const c of resumo.listaConvidados) {
+          const id = c.id;
+          const nome = (c.nomeCompleto || '').replace(/;/g, ',');
+          const acompanhante = (c.nomeAcompanhante || '').replace(/;/g, ',');
+          const temAcompanhante = c.nomeAcompanhante ? 'Sim' : 'Não';
+          const email = (c.email || '').replace(/;/g, ',');
+          const data = new Date(c.dataConfirmacao).toLocaleString('pt-BR');
+
+          conteudoCsv += `${id};${nome};${acompanhante};${temAcompanhante};${email};${data}\n`;
+        }
+
+        const blob = new Blob([conteudoCsv], { type: 'text/csv;charset=utf-8;' });
+        const urlBlob = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = urlBlob;
+        link.download = `convidados_francisco_${new Date().toISOString().slice(0, 10)}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(urlBlob);
+      } else {
+        const resposta = await fetch(`${urlApiBase}/api/convidados/exportar-planilha?chave=${encodeURIComponent(chaveSalva)}`, {
+          method: 'GET',
+        });
+
+        if (!resposta.ok) {
+          throw new Error('Não foi possível exportar a planilha.');
+        }
+
+        const blobArquivo = await resposta.blob();
+        const urlBlob = window.URL.createObjectURL(blobArquivo);
+        const linkDownload = document.createElement('a');
+        linkDownload.href = urlBlob;
+        linkDownload.download = `convidados_francisco_${new Date().toISOString().slice(0, 10)}.csv`;
+        document.body.appendChild(linkDownload);
+        linkDownload.click();
+        linkDownload.remove();
+        window.URL.revokeObjectURL(urlBlob);
       }
-
-      const blobArquivo = await resposta.blob();
-      const urlBlob = window.URL.createObjectURL(blobArquivo);
-      const linkDownload = document.createElement('a');
-      linkDownload.href = urlBlob;
-      linkDownload.download = `convidados_chadebebe_${new Date().toISOString().slice(0, 10)}.csv`;
-      document.body.appendChild(linkDownload);
-      linkDownload.click();
-      linkDownload.remove();
-      window.URL.revokeObjectURL(urlBlob);
     } catch (excecao) {
       const mensagem = excecao instanceof Error ? excecao.message : 'Erro ao baixar arquivo.';
       alert(mensagem);
