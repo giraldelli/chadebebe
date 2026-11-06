@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ChaDeBebe.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+36d4bb04b3fee50fab56717ddb2d25696270bd4b")]
 [assembly: System.Reflection.AssemblyProductAttribute("ChaDeBebe.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ChaDeBebe.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

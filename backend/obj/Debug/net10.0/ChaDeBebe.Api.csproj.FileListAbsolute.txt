@@ -128,3 +128,4 @@ D:\Projetos\chadebebe\backend\obj\Debug\net10.0\refint\ChaDeBebe.Api.dll
 D:\Projetos\chadebebe\backend\obj\Debug\net10.0\ChaDeBebe.Api.pdb
 D:\Projetos\chadebebe\backend\obj\Debug\net10.0\ChaDeBebe.Api.genruntimeconfig.cache
 D:\Projetos\chadebebe\backend\obj\Debug\net10.0\ref\ChaDeBebe.Api.dll
+D:\Projetos\chadebebe\backend\obj\Debug\net10.0\ChaDeBebe.Api.sourcelink.json
