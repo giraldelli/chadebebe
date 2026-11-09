@@ -1,4 +1,4 @@
-import { Clock, MapPin, Sparkles } from 'lucide-react';
+import { Clock, MapPin, Sparkles, ExternalLink } from 'lucide-react';
 
 export function CabecalhoEvento() {
   return (
@@ -26,26 +26,47 @@ export function CabecalhoEvento() {
 
       {/* Informações de Data, Hora e Local estilo Convite Editorial */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-        <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm hover:border-sky-300 transition-colors text-left flex items-start gap-4">
-          <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-700 border border-sky-100 flex items-center justify-center shrink-0 mt-0.5">
-            <Clock className="w-5 h-5" />
+        {/* Horário */}
+        <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm hover:border-sky-300 transition-colors text-left flex flex-col justify-between gap-3">
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-700 border border-sky-100 flex items-center justify-center shrink-0 mt-0.5">
+              <Clock className="w-5 h-5" />
+            </div>
+            <div className="space-y-0.5">
+              <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400">Horário</span>
+              <p className="text-base font-semibold text-slate-900">16:00 horas</p>
+              <p className="text-xs text-slate-500 font-normal">Aguardamos sua chegada</p>
+            </div>
           </div>
-          <div className="space-y-0.5">
-            <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400">Horário</span>
-            <p className="text-base font-semibold text-slate-900">16:00 horas</p>
-            <p className="text-xs text-slate-500 font-normal">Aguardamos sua chegada</p>
+          <div className="pt-1">
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-slate-400">
+              Esperamos você com carinho ✨
+            </span>
           </div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm hover:border-sky-300 transition-colors text-left flex items-start gap-4">
-          <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 border border-amber-100 flex items-center justify-center shrink-0 mt-0.5">
-            <MapPin className="w-5 h-5" />
+        {/* Localização com Botão do Google Maps */}
+        <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm hover:border-sky-300 transition-colors text-left flex flex-col justify-between gap-3">
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 border border-amber-100 flex items-center justify-center shrink-0 mt-0.5">
+              <MapPin className="w-5 h-5" />
+            </div>
+            <div className="space-y-0.5">
+              <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400">Localização</span>
+              <p className="text-base font-semibold text-slate-900">Condomínio Rio Jangada</p>
+              <p className="text-xs text-slate-500 font-normal">Cuiabá • Rio Coxipó</p>
+            </div>
           </div>
-          <div className="space-y-0.5">
-            <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400">Localização</span>
-            <p className="text-base font-semibold text-slate-900">Condomínio Rio Jangada</p>
-            <p className="text-xs text-slate-500 font-normal">Cuiabá • Rio Coxipó</p>
-          </div>
+
+          <a
+            href="https://maps.app.goo.gl/TxGrdmjGtfSXmpA67"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center gap-1.5 w-full py-2 px-3 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 text-xs font-semibold tracking-wide transition-all shadow-sm group"
+          >
+            <span>Como Chegar (Google Maps)</span>
+            <ExternalLink className="w-3.5 h-3.5 text-sky-600 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+          </a>
         </div>
       </div>
     </header>
