@@ -38,11 +38,6 @@ export function CabecalhoEvento() {
               <p className="text-xs text-slate-500 font-normal">Aguardamos sua chegada</p>
             </div>
           </div>
-          <div className="pt-1">
-            <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-slate-400">
-              Esperamos você com carinho ✨
-            </span>
-          </div>
         </div>
 
         {/* Localização com Botão do Google Maps */}
