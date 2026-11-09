@@ -125,14 +125,15 @@
   }
 }
 
+/* Delays negativos garantem que todos comecem a andar no segundo 0 já em posições alternadas, sem ficar parados */
 .animacao-carro-horizontal-direita-1 {
   animation: correrHorizontalDireita 14s linear infinite;
 }
 
 .animacao-carro-horizontal-direita-2 {
-  animation: correrHorizontalDireita 18s linear 7s infinite;
+  animation: correrHorizontalDireita 18s linear -10s infinite;
 }
 
 .animacao-carro-horizontal-esquerda {
-  animation: correrHorizontalEsquerda 16s linear 3s infinite;
+  animation: correrHorizontalEsquerda 16s linear -6s infinite;
 }
